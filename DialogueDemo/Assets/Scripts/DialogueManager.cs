@@ -3,19 +3,30 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEditor;
 
 public class DialogueManager : MonoBehaviour
 {
+    [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
     public string mTxtFileName = "demoTextFile.txt";
     public List<string> mTextList;
 
+    [Header("UI Data")]
+    public Text UIDialougeText;
+    
+    
+
     private void Start()
     {
         mTextList = new List<string>();
-        WriteToTxtFile("Hello, I am new here!", mTxtFileName);
         ReadTxtFile(mTxtFileName);
+    }
+
+    private void Update()
+    {
+
     }
 
     //For future plans: Add a way write text to a file dynamically when the game is coming
@@ -27,21 +38,19 @@ public class DialogueManager : MonoBehaviour
         {
             if (!File.Exists(filePath))
             {
-                Debug.LogError("ERROR: Missing file at this location!");
+                Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
                 return;
             }
 
             //Write some text to the txt file
-            StreamWriter writer = new StreamWriter(filePath, true);
-            writer.WriteLine(newText);
-            writer.Close();
+            using (StreamWriter txtWriter = new StreamWriter(filePath))
+            {
+                txtWriter.WriteLine(newText);
+            }
 
             //Re-import the file
             AssetDatabase.ImportAsset(filePath);
             TextAsset txtAsset = (TextAsset)Resources.Load(mTxtFileName);
-
-            //Print the new text from the file
-            Debug.Log(txtAsset.text);
         }
         catch(Exception ex)
         {
@@ -57,7 +66,7 @@ public class DialogueManager : MonoBehaviour
         {
             if (!File.Exists(filePath))
             {
-                Debug.LogError("ERROR: Missing file at this location!");
+                Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
                 return;
             }
 
@@ -66,8 +75,11 @@ public class DialogueManager : MonoBehaviour
             {
                 while (txtReader.Peek() >= 0)
                 {
-                    mTextList.Add(txtReader.ReadLine());
-                    Debug.Log(txtReader.ReadLine());
+                    string currentLine = txtReader.ReadLine();
+                    if (currentLine != "")
+                    {
+                        mTextList.Add(currentLine);
+                    }
                 }
             }
         }
