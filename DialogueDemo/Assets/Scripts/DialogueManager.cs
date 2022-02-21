@@ -8,32 +8,72 @@ using UnityEditor;
 
 public class DialogueManager : MonoBehaviour
 {
+    public Dialogue test;
+
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
-    public string mTxtFileName = "demoTextFile.txt";
-    public List<string> mTextList;
+    private Queue<string> mDialogueQueue;
 
     [Header("UI Data")]
     public Text UIDialougeText;
     
-    
-
     private void Start()
     {
-        mTextList = new List<string>();
-        ReadTxtFile(mTxtFileName);
+        mDialogueQueue = new Queue<string>();
+        StartDialogue(test);
     }
 
-    private void Update()
+    public void StartDialogue(Dialogue dialogue)
     {
+        //Read the dialouge from the text file
+        ReadTxtFile(dialogue);
+        if(dialogue.mDialougeLines.Count < 1)
+        {
+            return;
+        }
 
+        //Add lines to the queue
+        mDialogueQueue.Clear();
+        foreach(string line in dialogue.mDialougeLines)
+        {
+            mDialogueQueue.Enqueue(line);
+        }
+
+        DisplayNexLine();
+    }
+
+    public void DisplayNexLine()
+    {
+        if (mDialogueQueue.Count == 0)
+        {
+            return;
+        }
+
+        string newLine = mDialogueQueue.Dequeue();
+        StopAllCoroutines();
+        StartCoroutine(TypeLine(newLine));
+    }
+
+    public void EndDialogue()
+    {
+        UIDialougeText.text = "";
+    }
+
+    IEnumerator TypeLine(string line)
+    {
+        UIDialougeText.text = "";
+        foreach(char letter in line.ToCharArray())
+        {
+            UIDialougeText.text += letter;
+            yield return null;
+        }
     }
 
     //For future plans: Add a way write text to a file dynamically when the game is coming
     //This is a stretch goal for now
-    void WriteToTxtFile(string newText, string txtFile)
+    void WriteToTxtFile(string newText, Dialogue dialogue)
     {
-        string filePath = mTxtFilePath + txtFile;
+        string filePath = mTxtFilePath + dialogue.mTextFileName;
         try
         {
             if (!File.Exists(filePath))
@@ -50,7 +90,7 @@ public class DialogueManager : MonoBehaviour
 
             //Re-import the file
             AssetDatabase.ImportAsset(filePath);
-            TextAsset txtAsset = (TextAsset)Resources.Load(mTxtFileName);
+            TextAsset txtAsset = (TextAsset)Resources.Load(dialogue.mTextFileName);
         }
         catch(Exception ex)
         {
@@ -59,9 +99,10 @@ public class DialogueManager : MonoBehaviour
     }
 
 
-    void ReadTxtFile(string txtFile)
+    void ReadTxtFile(Dialogue dialogue)
     {
-        string filePath = mTxtFilePath + txtFile;
+        Debug.Log(mTxtFilePath + dialogue.mTextFileName);
+        string filePath = mTxtFilePath + dialogue.mTextFileName;
         try
         {
             if (!File.Exists(filePath))
@@ -78,7 +119,7 @@ public class DialogueManager : MonoBehaviour
                     string currentLine = txtReader.ReadLine();
                     if (currentLine != "")
                     {
-                        mTextList.Add(currentLine);
+                        dialogue.mDialougeLines.Add(currentLine);
                     }
                 }
             }
