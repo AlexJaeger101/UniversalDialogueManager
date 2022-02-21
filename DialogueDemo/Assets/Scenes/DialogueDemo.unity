@@ -156,7 +156,8 @@ MonoBehaviour:
     mTextFileName: demoTextFile.txt
     mDialougeLines: []
   mTxtFilePath: Assets/Resources/txtFiles/
-  UIDialougeText: {fileID: 1746941095}
+  mUIDialougeText: {fileID: 1746941095}
+  mTextScrollSpeed: 0.015
 --- !u!4 &69094484
 Transform:
   m_ObjectHideFlags: 0

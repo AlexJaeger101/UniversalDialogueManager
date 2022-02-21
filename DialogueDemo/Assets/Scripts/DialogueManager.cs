@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -15,7 +14,8 @@ public class DialogueManager : MonoBehaviour
     private Queue<string> mDialogueQueue;
 
     [Header("UI Data")]
-    public Text UIDialougeText;
+    public Text mUIDialougeText;
+    public float mTextScrollSpeed = 0.015f;
     
     private void Start()
     {
@@ -46,6 +46,7 @@ public class DialogueManager : MonoBehaviour
     {
         if (mDialogueQueue.Count == 0)
         {
+            EndDialogue();
             return;
         }
 
@@ -56,52 +57,22 @@ public class DialogueManager : MonoBehaviour
 
     public void EndDialogue()
     {
-        UIDialougeText.text = "";
+        mUIDialougeText.text = string.Empty;
     }
 
     IEnumerator TypeLine(string line)
     {
-        UIDialougeText.text = "";
+        mUIDialougeText.text = string.Empty;
         foreach(char letter in line.ToCharArray())
         {
-            UIDialougeText.text += letter;
-            yield return null;
-        }
-    }
-
-    //For future plans: Add a way write text to a file dynamically when the game is coming
-    //This is a stretch goal for now
-    void WriteToTxtFile(string newText, Dialogue dialogue)
-    {
-        string filePath = mTxtFilePath + dialogue.mTextFileName;
-        try
-        {
-            if (!File.Exists(filePath))
-            {
-                Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
-                return;
-            }
-
-            //Write some text to the txt file
-            using (StreamWriter txtWriter = new StreamWriter(filePath))
-            {
-                txtWriter.WriteLine(newText);
-            }
-
-            //Re-import the file
-            AssetDatabase.ImportAsset(filePath);
-            TextAsset txtAsset = (TextAsset)Resources.Load(dialogue.mTextFileName);
-        }
-        catch(Exception ex)
-        {
-            Debug.LogError("Error: Failed to write to file " + ex.ToString());
+            mUIDialougeText.text += letter;
+            yield return new WaitForSeconds(mTextScrollSpeed);
         }
     }
 
 
     void ReadTxtFile(Dialogue dialogue)
     {
-        Debug.Log(mTxtFilePath + dialogue.mTextFileName);
         string filePath = mTxtFilePath + dialogue.mTextFileName;
         try
         {
@@ -126,7 +97,7 @@ public class DialogueManager : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Debug.LogError("Error: Failed to read file " + ex.ToString());
+            Debug.LogError("ERROR: Failed to read file " + ex.ToString());
         }
     }
 }
