@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,32 +10,58 @@ public class DialogueManager : MonoBehaviour
 {
     public Dialogue test;
 
+
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
     private Queue<string> mDialogueQueue;
+    private Regex lineReg = new Regex("(?<=').*?(?=')");
 
     [Header("UI Data")]
     public Text mUIDialougeText;
-    public float mTextScrollSpeed = 0.015f;
+    private float mCurrentTextSpeed;
+    public float mPauseTime = 1.0f;
+    public float mDefualtTextScroll = 0.015f;
+    public float mFastTextScroll = 0.0015f;
+    public float mSlowTextScroll = 0.15f;
     
     private void Start()
     {
         mDialogueQueue = new Queue<string>();
-        StartDialogue(test);
+        mCurrentTextSpeed = mDefualtTextScroll;
     }
 
-    public void StartDialogue(Dialogue dialogue)
+    //Just for testing purposes
+    public void StartDialogue()
     {
         //Read the dialouge from the text file
-        ReadTxtFile(dialogue);
-        if(dialogue.mDialougeLines.Count < 1)
+        List<string> lines = ReadTxtFile(test);
+        if (lines.Count < 1)
         {
             return;
         }
 
         //Add lines to the queue
         mDialogueQueue.Clear();
-        foreach(string line in dialogue.mDialougeLines)
+        foreach (string line in lines)
+        {
+            mDialogueQueue.Enqueue(line);
+        }
+
+        DisplayNexLine();
+    }
+
+    public void StartDialogue(Dialogue dialogue)
+    {
+        //Read the dialouge from the text file
+        List<string> lines = ReadTxtFile(dialogue);
+        if(lines.Count < 1)
+        {
+            return;
+        }
+
+        //Add lines to the queue
+        mDialogueQueue.Clear();
+        foreach(string line in lines)
         {
             mDialogueQueue.Enqueue(line);
         }
@@ -60,26 +87,60 @@ public class DialogueManager : MonoBehaviour
         mUIDialougeText.text = string.Empty;
     }
 
-    IEnumerator TypeLine(string line)
+    private IEnumerator TypeLine(string line)
     {
+        float textSpeed = mDefualtTextScroll;
+
         mUIDialougeText.text = string.Empty;
         foreach(char letter in line.ToCharArray())
         {
-            mUIDialougeText.text += letter;
-            yield return new WaitForSeconds(mTextScrollSpeed);
+            if (mCurrentTextSpeed == mPauseTime)
+            {
+                mCurrentTextSpeed = mDefualtTextScroll;
+            }
+
+            switch (letter)
+            {
+                case '_': //Pause
+
+                    mCurrentTextSpeed = mPauseTime;
+                    break;
+
+                case '-': //Slow
+
+                    mCurrentTextSpeed = mSlowTextScroll;
+                    break;
+
+                case '+': //Fast
+
+                    mCurrentTextSpeed = mFastTextScroll;
+                    break;
+
+                case '=': //defualt speed
+                    mCurrentTextSpeed = mDefualtTextScroll;
+                    break;
+
+                default:
+
+                    mUIDialougeText.text += letter;
+                    break;
+            }
+
+            yield return new WaitForSeconds(mCurrentTextSpeed);
         }
     }
 
 
-    void ReadTxtFile(Dialogue dialogue)
+    private List<string> ReadTxtFile(Dialogue dialogue)
     {
+        List<string> stringList = new List<string>();
         string filePath = mTxtFilePath + dialogue.mTextFileName;
         try
         {
             if (!File.Exists(filePath))
             {
                 Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
-                return;
+                return new List<string>();
             }
 
             //Read the text from directly from the txt file
@@ -90,7 +151,7 @@ public class DialogueManager : MonoBehaviour
                     string currentLine = txtReader.ReadLine();
                     if (currentLine != "")
                     {
-                        dialogue.mDialougeLines.Add(currentLine);
+                        stringList.Add(currentLine);
                     }
                 }
             }
@@ -99,5 +160,7 @@ public class DialogueManager : MonoBehaviour
         {
             Debug.LogError("ERROR: Failed to read file " + ex.ToString());
         }
+
+        return stringList;
     }
 }

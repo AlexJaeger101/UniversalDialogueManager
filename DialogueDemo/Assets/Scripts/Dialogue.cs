@@ -6,5 +6,4 @@ using UnityEngine;
 public class Dialogue
 {
     public string mTextFileName;
-    public List<string> mDialougeLines;
 }
