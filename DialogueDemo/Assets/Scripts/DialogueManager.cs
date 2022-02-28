@@ -23,6 +23,7 @@ public class DialogueManager : MonoBehaviour
     public float mDefualtTextScroll = 0.015f;
     public float mFastTextScroll = 0.0015f;
     public float mSlowTextScroll = 0.15f;
+    private bool mShouldType = false;
     
     private void Start()
     {
@@ -47,7 +48,7 @@ public class DialogueManager : MonoBehaviour
             mDialogueQueue.Enqueue(line);
         }
 
-        DisplayNexLine();
+        DisplayNextLine();
     }
 
     public void StartDialogue(Dialogue dialogue)
@@ -66,10 +67,10 @@ public class DialogueManager : MonoBehaviour
             mDialogueQueue.Enqueue(line);
         }
 
-        DisplayNexLine();
+        DisplayNextLine();
     }
 
-    public void DisplayNexLine()
+    public void DisplayNextLine()
     {
         if (mDialogueQueue.Count == 0)
         {
@@ -94,39 +95,52 @@ public class DialogueManager : MonoBehaviour
         mUIDialougeText.text = string.Empty;
         foreach(char letter in line.ToCharArray())
         {
-            if (mCurrentTextSpeed == mPauseTime)
+            if (letter == '[')
             {
-                mCurrentTextSpeed = mDefualtTextScroll;
+                mShouldType = false;
             }
-
-            switch (letter)
+            else if (letter == ']')
             {
-                case '_': //Pause
-
-                    mCurrentTextSpeed = mPauseTime;
-                    break;
-
-                case '-': //Slow
-
-                    mCurrentTextSpeed = mSlowTextScroll;
-                    break;
-
-                case '+': //Fast
-
-                    mCurrentTextSpeed = mFastTextScroll;
-                    break;
-
-                case '=': //defualt speed
-                    mCurrentTextSpeed = mDefualtTextScroll;
-                    break;
-
-                default:
-
-                    mUIDialougeText.text += letter;
-                    break;
+                mShouldType = true;
+            }
+            else
+            {
+                DialogueController(letter);
             }
 
             yield return new WaitForSeconds(mCurrentTextSpeed);
+        }
+    }
+
+    private void DialogueController(char letter)
+    {
+        if (!mShouldType)
+        {
+            mUIDialougeText.text += letter;
+            return;
+        }
+
+        switch (letter)
+        {
+            case '_': //Pause
+
+                mCurrentTextSpeed = mPauseTime;
+                break;
+
+            case '-': //Slow
+
+                mCurrentTextSpeed = mSlowTextScroll;
+                break;
+
+            case '+': //Fast
+
+                mCurrentTextSpeed = mFastTextScroll;
+                break;
+
+            case '=': //defualt speed
+
+                mCurrentTextSpeed = mDefualtTextScroll;
+                break;
         }
     }
 

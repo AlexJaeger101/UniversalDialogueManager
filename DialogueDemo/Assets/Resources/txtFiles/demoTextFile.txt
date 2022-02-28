@@ -1,7 +1,7 @@
-Hello! _This is a test line!!!
+[Hello! ]_=[This is a test line!!!]
 
-Here is a new line btw :)
+[Here is a new line. New added stuff here]
 
-+How about we pick up the speed here, I got places to be and bugs to fix!!!!!
++[How about we pick up the speed here, I got places to be!!!!!]=
 
--ok fiiiiiiine, =i'll slow it down for the final line
+[ok]-[ fiiiiiiiiiiiiine, ]=[i'll slow it down for the final line.]

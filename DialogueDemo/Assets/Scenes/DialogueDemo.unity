@@ -340,7 +340,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 69094483}
         m_TargetAssemblyTypeName: DialogueManager, Assembly-CSharp
-        m_MethodName: DisplayNexLine
+        m_MethodName: DisplayNextLine
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
