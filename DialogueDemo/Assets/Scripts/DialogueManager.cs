@@ -14,7 +14,6 @@ public class DialogueManager : MonoBehaviour
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
     private Queue<string> mDialogueQueue;
-    private Regex lineReg = new Regex("(?<=').*?(?=')");
 
     [Header("UI Data")]
     public Text mUIDialougeText;
@@ -97,11 +96,11 @@ public class DialogueManager : MonoBehaviour
         {
             if (letter == '[')
             {
-                mShouldType = false;
+                mShouldType = true;
             }
             else if (letter == ']')
             {
-                mShouldType = true;
+                mShouldType = false;
             }
             else
             {
@@ -114,7 +113,7 @@ public class DialogueManager : MonoBehaviour
 
     private void DialogueController(char letter)
     {
-        if (!mShouldType)
+        if (mShouldType)
         {
             mUIDialougeText.text += letter;
             return;
@@ -140,6 +139,11 @@ public class DialogueManager : MonoBehaviour
             case '=': //defualt speed
 
                 mCurrentTextSpeed = mDefualtTextScroll;
+                break;
+
+            default:
+
+                Debug.Log("Invalid symbol");
                 break;
         }
     }
