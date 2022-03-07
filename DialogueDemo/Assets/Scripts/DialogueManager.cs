@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -158,7 +157,7 @@ public class DialogueManager : MonoBehaviour
             if (!File.Exists(filePath))
             {
                 Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
-                return new List<string>();
+                return stringList;
             }
 
             //Read the text from directly from the txt file
