@@ -22,6 +22,9 @@ public class DialogueManager : MonoBehaviour
     public float mFastTextScroll = 0.0015f;
     public float mSlowTextScroll = 0.15f;
     private bool mShouldType = false;
+
+    [Header("Misc")]
+    public AudioManager mAM;
     
     private void Start()
     {
@@ -46,7 +49,7 @@ public class DialogueManager : MonoBehaviour
             mDialogueQueue.Enqueue(line);
         }
 
-        DisplayNextLine();
+        DisplayNextLine(test);
     }
 
     public void StartDialogue(Dialogue dialogue)
@@ -65,8 +68,9 @@ public class DialogueManager : MonoBehaviour
             mDialogueQueue.Enqueue(line);
         }
 
-        DisplayNextLine();
+        DisplayNextLine(dialogue);
     }
+
 
     public void DisplayNextLine()
     {
@@ -78,7 +82,20 @@ public class DialogueManager : MonoBehaviour
 
         string newLine = mDialogueQueue.Dequeue();
         StopAllCoroutines();
-        StartCoroutine(TypeLine(newLine));
+        StartCoroutine(TypeLine(newLine, test.mSoundFontNoises));
+    }
+
+    public void DisplayNextLine(Dialogue dialogue)
+    {
+        if (mDialogueQueue.Count == 0)
+        {
+            EndDialogue();
+            return;
+        }
+
+        string newLine = mDialogueQueue.Dequeue();
+        StopAllCoroutines();
+        StartCoroutine(TypeLine(newLine, dialogue.mSoundFontNoises));
     }
 
     public void EndDialogue()
@@ -86,9 +103,12 @@ public class DialogueManager : MonoBehaviour
         mUIDialougeText.text = string.Empty;
     }
 
-    private IEnumerator TypeLine(string line)
+    private IEnumerator TypeLine(string line, AudioClip[] clips)
     {
-        float textSpeed = mDefualtTextScroll;
+        if (clips.Length > 0)
+        {
+            mAM.SpeakingOnLoop(clips);
+        }
 
         mUIDialougeText.text = string.Empty;
         foreach(char letter in line.ToCharArray())
@@ -108,6 +128,8 @@ public class DialogueManager : MonoBehaviour
 
             yield return new WaitForSeconds(mCurrentTextSpeed);
         }
+
+        mAM.mIsPlaying = false;
     }
 
     private void DialogueController(char letter)
@@ -123,6 +145,7 @@ public class DialogueManager : MonoBehaviour
             case '_': //Pause
 
                 mCurrentTextSpeed = mPauseTime;
+                mAM.mIsPlaying = false;
                 break;
 
             case '-': //Slow
@@ -137,6 +160,7 @@ public class DialogueManager : MonoBehaviour
 
             case '=': //defualt speed
 
+                mAM.mIsPlaying = true;
                 mCurrentTextSpeed = mDefualtTextScroll;
                 break;
 
