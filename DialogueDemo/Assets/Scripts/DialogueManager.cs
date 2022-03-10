@@ -13,15 +13,17 @@ public class DialogueManager : MonoBehaviour
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
     private Queue<string> mDialogueQueue;
-
-    [Header("UI Data")]
-    public Text mUIDialougeText;
+    private Dialogue mCurrentDialogue;
     private float mCurrentTextSpeed;
     public float mPauseTime = 1.0f;
     public float mDefualtTextScroll = 0.015f;
     public float mFastTextScroll = 0.0015f;
     public float mSlowTextScroll = 0.15f;
     private bool mShouldType = false;
+
+    [Header("UI Data")]
+    public Text mUIDialougeText;
+    public Canvas mDialougeUI;
 
     [Header("Misc")]
     public AudioManager mAM;
@@ -30,32 +32,24 @@ public class DialogueManager : MonoBehaviour
     {
         mDialogueQueue = new Queue<string>();
         mCurrentTextSpeed = mDefualtTextScroll;
+        mDialougeUI.enabled = false;
     }
 
-    //Just for testing purposes
-    public void StartDialogue()
+    private void Update()
     {
-        //Read the dialouge from the text file
-        List<string> lines = ReadTxtFile(test);
-        if (lines.Count < 1)
+        if(Input.GetKeyDown(KeyCode.Space))
         {
-            return;
+            StartDialogue(test);
         }
-
-        //Add lines to the queue
-        mDialogueQueue.Clear();
-        foreach (string line in lines)
-        {
-            mDialogueQueue.Enqueue(line);
-        }
-
-        DisplayNextLine(test);
     }
 
     public void StartDialogue(Dialogue dialogue)
     {
+        mCurrentDialogue = dialogue;
+        mDialougeUI.enabled = true;
+
         //Read the dialouge from the text file
-        List<string> lines = ReadTxtFile(dialogue);
+        List<string> lines = ReadTxtFile(mCurrentDialogue);
         if(lines.Count < 1)
         {
             return;
@@ -68,7 +62,7 @@ public class DialogueManager : MonoBehaviour
             mDialogueQueue.Enqueue(line);
         }
 
-        DisplayNextLine(dialogue);
+        DisplayNextLine();
     }
 
 
@@ -82,25 +76,14 @@ public class DialogueManager : MonoBehaviour
 
         string newLine = mDialogueQueue.Dequeue();
         StopAllCoroutines();
-        StartCoroutine(TypeLine(newLine, test.mSoundFontNoises));
-    }
-
-    public void DisplayNextLine(Dialogue dialogue)
-    {
-        if (mDialogueQueue.Count == 0)
-        {
-            EndDialogue();
-            return;
-        }
-
-        string newLine = mDialogueQueue.Dequeue();
-        StopAllCoroutines();
-        StartCoroutine(TypeLine(newLine, dialogue.mSoundFontNoises));
+        StartCoroutine(TypeLine(newLine, mCurrentDialogue.mSoundFontNoises));
     }
 
     public void EndDialogue()
     {
+        mDialougeUI.enabled = false;
         mUIDialougeText.text = string.Empty;
+        mCurrentDialogue = null;
     }
 
     private IEnumerator TypeLine(string line, AudioClip[] clips)
