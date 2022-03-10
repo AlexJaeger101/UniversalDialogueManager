@@ -1,0 +1,7 @@
+[This pretty funny sound you are hearing is a sound font!]
+
+[I created a complemetary Audio manager to be used alongside the dialogue]
+
+[Sound fonts are completely optional to add and the parameter is completely optional]
+
+[However if you would like to use them, you can add them!]

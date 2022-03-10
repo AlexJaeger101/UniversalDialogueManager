@@ -1,0 +1,7 @@
+[Hello, this is my portfolio project!]
+
+[It is a dialogue manager that uses text files to easily implement dialogue]
+
+[This manager can be easily implemented in both a 3D and 2D enviorment]
+
+[Isn't that neat?]

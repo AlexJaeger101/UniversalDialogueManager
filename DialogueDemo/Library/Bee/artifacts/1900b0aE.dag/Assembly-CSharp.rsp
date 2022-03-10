@@ -312,8 +312,11 @@
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEditor.UI.ref.dll"
 -r:"Library/Bee/artifacts/1900b0aE.dag/UnityEngine.UI.ref.dll"
 "Assets/Scripts/AudioManager.cs"
+"Assets/Scripts/CameraController.cs"
 "Assets/Scripts/Dialogue.cs"
 "Assets/Scripts/DialogueManager.cs"
+"Assets/Scripts/PlayerController.cs"
+"Assets/Scripts/Talker.cs"
 -langversion:8.0
 
 /deterministic

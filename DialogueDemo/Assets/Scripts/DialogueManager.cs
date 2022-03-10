@@ -7,8 +7,7 @@ using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
-    public Dialogue test;
-
+    public static DialogueManager Instance { get; private set; }
 
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
@@ -27,7 +26,18 @@ public class DialogueManager : MonoBehaviour
 
     [Header("Misc")]
     public AudioManager mAM;
-    
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+    }
+
     private void Start()
     {
         mDialogueQueue = new Queue<string>();
@@ -39,14 +49,17 @@ public class DialogueManager : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            StartDialogue(test);
+            DisplayNextLine();
         }
     }
 
     public void StartDialogue(Dialogue dialogue)
     {
+        if (dialogue == null)
+        {
+            return;
+        }
         mCurrentDialogue = dialogue;
-        mDialougeUI.enabled = true;
 
         //Read the dialouge from the text file
         List<string> lines = ReadTxtFile(mCurrentDialogue);
@@ -54,6 +67,7 @@ public class DialogueManager : MonoBehaviour
         {
             return;
         }
+        mDialougeUI.enabled = true;
 
         //Add lines to the queue
         mDialogueQueue.Clear();
@@ -86,9 +100,9 @@ public class DialogueManager : MonoBehaviour
         mCurrentDialogue = null;
     }
 
-    private IEnumerator TypeLine(string line, AudioClip[] clips)
+    private IEnumerator TypeLine(string line, AudioClip[] clips = null)
     {
-        if (clips.Length > 0)
+        if (clips.Length > 0 && clips != null)
         {
             mAM.SpeakingOnLoop(clips);
         }
@@ -163,7 +177,7 @@ public class DialogueManager : MonoBehaviour
         {
             if (!File.Exists(filePath))
             {
-                Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
+                Debug.LogError("ERROR: Missing file at location: " + filePath + ". Is your filename and/or path correct?");
                 return stringList;
             }
 
