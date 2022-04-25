@@ -1,0 +1,5 @@
+[The manager is flexable enough where it can be easily modified and used for a varity of different games/implementation]
+
+[Oh, also! Because the dialogue is stored in text files, we can easily change  and alter dialogue on the fly.]
+
+[We can even change dialogue when the program is running by simply changing the text file]

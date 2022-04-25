@@ -1,0 +1,7 @@
+[Thats not all, we can also control text speed with special symbols in the text file]
+
+[= will pause the dialogue ]_=[just like so!]
+
++[+ will make the text speed go reeeeeeeeeeeally fast! ]=[While - makes the dialogue go ]-[veeeeeeeery ]=[slow]
+
+[= Will change back the speed to its default value.]

@@ -7,56 +7,67 @@ using UnityEngine.UI;
 
 public class DialogueManager : MonoBehaviour
 {
-    public Dialogue test;
-
+    public static DialogueManager Instance { get; private set; }
 
     [Header("Text Data")]
     public string mTxtFilePath = "Assets/Resources/txtFiles/";
     private Queue<string> mDialogueQueue;
-
-    [Header("UI Data")]
-    public Text mUIDialougeText;
+    private Dialogue mCurrentDialogue;
     private float mCurrentTextSpeed;
     public float mPauseTime = 1.0f;
     public float mDefualtTextScroll = 0.015f;
     public float mFastTextScroll = 0.0015f;
     public float mSlowTextScroll = 0.15f;
     private bool mShouldType = false;
-    
+
+    [Header("UI Data")]
+    public Text mUIDialougeText;
+    public Canvas mDialougeUI;
+
+    [Header("Misc")]
+    public AudioManager mAM;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+    }
+
     private void Start()
     {
         mDialogueQueue = new Queue<string>();
         mCurrentTextSpeed = mDefualtTextScroll;
+        mDialougeUI.enabled = false;
     }
 
-    //Just for testing purposes
-    public void StartDialogue()
+    private void Update()
     {
-        //Read the dialouge from the text file
-        List<string> lines = ReadTxtFile(test);
-        if (lines.Count < 1)
+        if(Input.GetKeyDown(KeyCode.Space))
         {
-            return;
+            DisplayNextLine();
         }
-
-        //Add lines to the queue
-        mDialogueQueue.Clear();
-        foreach (string line in lines)
-        {
-            mDialogueQueue.Enqueue(line);
-        }
-
-        DisplayNextLine();
     }
 
     public void StartDialogue(Dialogue dialogue)
     {
+        if (dialogue == null)
+        {
+            return;
+        }
+        mCurrentDialogue = dialogue;
+
         //Read the dialouge from the text file
-        List<string> lines = ReadTxtFile(dialogue);
+        List<string> lines = ReadTxtFile(mCurrentDialogue);
         if(lines.Count < 1)
         {
             return;
         }
+        mDialougeUI.enabled = true;
 
         //Add lines to the queue
         mDialogueQueue.Clear();
@@ -68,6 +79,7 @@ public class DialogueManager : MonoBehaviour
         DisplayNextLine();
     }
 
+
     public void DisplayNextLine()
     {
         if (mDialogueQueue.Count == 0)
@@ -78,17 +90,22 @@ public class DialogueManager : MonoBehaviour
 
         string newLine = mDialogueQueue.Dequeue();
         StopAllCoroutines();
-        StartCoroutine(TypeLine(newLine));
+        StartCoroutine(TypeLine(newLine, mCurrentDialogue.mSoundFontNoises));
     }
 
     public void EndDialogue()
     {
+        mDialougeUI.enabled = false;
         mUIDialougeText.text = string.Empty;
+        mCurrentDialogue = null;
     }
 
-    private IEnumerator TypeLine(string line)
+    private IEnumerator TypeLine(string line, AudioClip[] clips = null)
     {
-        float textSpeed = mDefualtTextScroll;
+        if (clips.Length > 0 && clips != null)
+        {
+            mAM.SpeakingOnLoop(clips);
+        }
 
         mUIDialougeText.text = string.Empty;
         foreach(char letter in line.ToCharArray())
@@ -108,6 +125,8 @@ public class DialogueManager : MonoBehaviour
 
             yield return new WaitForSeconds(mCurrentTextSpeed);
         }
+
+        mAM.mIsPlaying = false;
     }
 
     private void DialogueController(char letter)
@@ -123,6 +142,7 @@ public class DialogueManager : MonoBehaviour
             case '_': //Pause
 
                 mCurrentTextSpeed = mPauseTime;
+                mAM.mIsPlaying = false;
                 break;
 
             case '-': //Slow
@@ -137,6 +157,7 @@ public class DialogueManager : MonoBehaviour
 
             case '=': //defualt speed
 
+                mAM.mIsPlaying = true;
                 mCurrentTextSpeed = mDefualtTextScroll;
                 break;
 
@@ -156,7 +177,7 @@ public class DialogueManager : MonoBehaviour
         {
             if (!File.Exists(filePath))
             {
-                Debug.LogError("ERROR: Missing file at this location! Is your filename and/or path correct?");
+                Debug.LogError("ERROR: Missing file at location: " + filePath + ". Is your filename and/or path correct?");
                 return stringList;
             }
 
